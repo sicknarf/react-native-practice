@@ -1,26 +1,45 @@
 import { useState } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
+import {StatusBar} from 'expo-status-bar'
 import GoalItem from './components/GoalItem';
 import GoalInput from './components/GoalInput';
 
 export default function App() {
-
+  const [modalIsVisible, setModalIsVisible] = useState(false)
   const [courseGoals, setCourseGoals] = useState([]);
 
+  function startAddGoalHandler() {
+    setModalIsVisible(true);
+  }
+
+  function endAddGoalHandler() {
+    setModalIsVisible(false)
+  }
+
   function addGoalHandler(enteredGoalText) {
-    // setEnteredGoalText('');
     setCourseGoals(currentCourseGoals => [
       ...currentCourseGoals,
       {text: enteredGoalText, id: Math.random().toString()},
     ]);
+    endAddGoalHandler();
+  }
+
+  function deleteGoalHandler(id) {
+    setCourseGoals(currentCourseGoals => {
+      return currentCourseGoals.filter((goal)=> goal.id !== id)
+    });
   }
     
   return (
+    <>
+    <StatusBar style='light'/>
     <View style={styles.appContainer}>
-      <GoalInput 
-        onAddGoal={addGoalHandler} 
-
-      />
+      <Button 
+        title='add new goal' 
+        color='#a065ec' 
+        onPress={startAddGoalHandler}
+        />
+      <GoalInput onAddGoal={addGoalHandler} visible={modalIsVisible} onCancel={endAddGoalHandler}/>
       {/* below will display the list of goals to be rendered */}
       <View style={styles.goalsContainer}>
       {/* <ScrollView alwaysBounceVertical={false}>
@@ -34,7 +53,11 @@ export default function App() {
         data={courseGoals} 
         renderItem={itemData => {
           return(
-            <GoalItem text={itemData.item.text}/>
+            <GoalItem
+              text={itemData.item.text}
+              id={itemData.item.id}
+              onDeleteItem={deleteGoalHandler}
+              />
           )
       }} 
       alwaysBounceVertical={false} 
@@ -44,6 +67,7 @@ export default function App() {
       />
       </View>
     </View>
+    </>
   );
 }
 
